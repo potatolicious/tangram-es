@@ -35,8 +35,14 @@ styles:
 
 sources:
     osm:
-        type: MVT
-        url:  http://vector.mapzen.com/osm/all/{z}/{x}/{y}.mvt
+        type: VTM
+        url:  http://opensciencemap.org/tiles/vtm/{z}/{x}/{y}.vtm
+        #url:  http://localhost/~jeff/tilecache/{z}/{x}/{y}
+
+    s3db:
+        type: VTM3D
+        url:  http://opensciencemap.org/tiles/s3db/{z}/{x}/{y}.vtm
+        #url:  http://localhost/~jeff/s3dbcache/{z}/{x}/{y}
 
 layers:
     earth:
@@ -48,14 +54,6 @@ layers:
 
     landuse:
         data: { source: osm }
-        filter:
-            name: true
-            any:
-                - { $zoom: { min: 9 }, area: { min: 10000000 } }
-                - { $zoom: { min: 10 }, area: { min: 3300000 } }
-                - { $zoom: { min: 12 }, area: { min: 1000000 } }
-                - { $zoom: { min: 13 }, area: { min: 10000 } }
-                - { $zoom: { min: 15 } }
         draw:
             polygons:
                 order: 1
@@ -79,14 +77,6 @@ layers:
 
     water:
         data: { source: osm }
-        filter:
-            any:
-                # show smaller water areas at higher zooms
-                - { $zoom: { min: 0 }, area: { min: 10000000 } }
-                - { $zoom: { min: 10 }, area: { min: 1000000 } }
-                - { $zoom: { min: 12 }, area: { min: 100000 } }
-                - { $zoom: { min: 15 }, area: { min: 1000 } }
-                - { $zoom: { min: 18 } }
         draw:
             polygons:
                 order: 3
@@ -152,27 +142,35 @@ layers:
                         outline:
                             color: orange
                             width: 0.01
-    buildings:
-        data: { source: osm }
-        filter: { $zoom: { min: 14 } }
+    # buildings:
+    #     data: { source: osm }
+    #     filter: { $zoom: { min: 14 } }
+    #     draw:
+    #         heightglow:
+    #             order: 50
+    #             color: [.65, .65, .65]
+    #     # turn interactive feature selection on for buildings with names
+    #     interactive:
+    #         filter: { name: true }
+    #         draw: { heightglow: { interactive: true } }
+    #     extruded:
+    #         filter: { $zoom: { min: 15 } }
+    #         draw:
+    #             heightglow:
+    #                 extrude: true
+    #     high-line:
+    #         filter: {roof_material: grass}
+    #         draw:
+    #             heightglow:
+    #                 color: '#bddec5'
+
+    s3db:
+        data: { source: s3db }
         draw:
-            heightglow:
+            polygons:
                 order: 50
                 color: [.65, .65, .65]
-        # turn interactive feature selection on for buildings with names
-        interactive:
-            filter: { name: true }
-            draw: { heightglow: { interactive: true } }
-        extruded:
-            filter: { $zoom: { min: 15 } }
-            draw:
-                heightglow:
-                    extrude: true
-        high-line:
-            filter: {roof_material: grass}
-            draw:
-                heightglow:
-                    color: '#bddec5'
+
     road_labels:
         data: {source: osm, layer: roads}
         filter: { name: true, aeroway: false, tunnel: false, railway: false, not: { kind: rail }, $zoom: { min: 10 } }

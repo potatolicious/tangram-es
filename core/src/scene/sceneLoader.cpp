@@ -8,6 +8,7 @@
 #include "geoJsonSource.h"
 #include "material.h"
 #include "mvtSource.h"
+#include "vtmSource.h"
 #include "polygonStyle.h"
 #include "polylineStyle.h"
 #include "textStyle.h"
@@ -402,17 +403,20 @@ void SceneLoader::loadSources(Node sources, TileManager& tileManager) {
 
         if (type == "GeoJSONTiles") {
             sourcePtr = std::shared_ptr<DataSource>(new GeoJsonSource(name, url));
-            sourcePtr->setCacheSize(CACHE_SIZE);
         } else if (type == "TopoJSONTiles") {
             logMsg("WARNING: TopoJSON data sources not yet implemented\n"); // TODO
         } else if (type == "MVT") {
-            sourcePtr = std::shared_ptr<DataSource>(new MVTSource(name, url));
-            sourcePtr->setCacheSize(CACHE_SIZE);
+            sourcePtr = std::unique_ptr<DataSource>(new MVTSource(name, url));
+        } else if (type == "VTM") {
+            sourcePtr = std::unique_ptr<DataSource>(new VTMSource(0, 16, false, name, url));
+        } else if (type == "VTM3D") {
+            sourcePtr = std::unique_ptr<DataSource>(new VTMSource(16, 16, true, name, url));
         } else {
             logMsg("WARNING: unrecognized data source type \"%s\", skipping\n", type.c_str());
         }
 
         if (sourcePtr) {
+            sourcePtr->setCacheSize(CACHE_SIZE);
             tileManager.addDataSource(std::move(sourcePtr));
         }
     }
