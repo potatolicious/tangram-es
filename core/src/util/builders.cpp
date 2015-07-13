@@ -120,16 +120,9 @@ void Builders::buildPolygon(const Polygon& _polygon, float _height, PolygonBuild
 
 void Builders::buildPolygon(const Polygon& _polygon, float _height, PolygonBuilder& _ctx) {
 
-    // The index type. Defaults to uint32_t, but you can also pass uint16_t if you know that your
-    // data won't have more than 65536 vertices.
-    using N = int;
+    mapbox::Earcut<float, uint16_t> earcut;
 
-    // Create tessellator
-    mapbox::Earcut<float, N> earcut;
-
-    // Run tessellation
     earcut(_polygon);
-    // You can now reuse the earcut object as you wish.
 
     _ctx.indices = std::move(earcut.indices);
 
@@ -137,7 +130,6 @@ void Builders::buildPolygon(const Polygon& _polygon, float _height, PolygonBuild
 
     if (_ctx.useTexCoords) {
         if (_polygon.size() > 0 && _polygon[0].size() > 0) {
-            // FIXME 0,0 ?
             // initialize the axis-aligned bounding box of the polygon
             bbox = isect2d::AABB(_polygon[0][0].x, _polygon[0][0].y, 0, 0);
         }
@@ -235,7 +227,7 @@ inline void addPolyLineVertex(const glm::vec3& _coord, const glm::vec2& _normal,
 }
 
 // Helper function for polyline tesselation; adds indices for pairs of vertices arranged like a line strip
-void indexPairs( int _nPairs, int _nVertices, std::vector<int>& _indicesOut) {
+void indexPairs( int _nPairs, int _nVertices, std::vector<uint16_t>& _indicesOut) {
     for (int i = 0; i < _nPairs; i++) {
         _indicesOut.push_back(_nVertices - 2*i - 4);
         _indicesOut.push_back(_nVertices - 2*i - 2);
