@@ -6,9 +6,7 @@
 #include "platform.h"
 #include <memory>
 
-#if USE_LIBTESS
 #include "tesselator.h"
-#else
 #include "earcut.hpp/include/earcut.hpp"
 
 namespace mapbox { namespace util {
@@ -26,8 +24,6 @@ struct nth<1, Tangram::Point> {
 };
 }}
 
-#endif
-
 namespace Tangram {
 
 CapTypes CapTypeFromString(const std::string& str) {
@@ -42,21 +38,28 @@ JoinTypes JoinTypeFromString(const std::string& str) {
     return JoinTypes::miter;
 }
 
-#if USE_LIBTESS
-
 void* alloc(void* _userData, unsigned int _size) {
-    return malloc(_size);
+    return std::malloc(_size);
 }
 
 void* realloc(void* _userData, void* _ptr, unsigned int _size) {
-    return realloc(_ptr, _size);
+    return std::realloc(_ptr, _size);
 }
 
 void free(void* _userData, void* _ptr) {
-    free(_ptr);
+    std::free(_ptr);
 }
 
-void Builders::buildPolygon(const Polygon& _polygon, float _height, PolygonBuilder& _ctx) {
+static TESSalloc allocator = {&alloc, &realloc, &free, nullptr,
+                              64, // meshEdgeBucketSize
+                              64, // meshVertexBucketSize
+                              16,  // meshFaceBucketSize
+                              64, // dictNodeBucketSize
+                              16,  // regionBucketSize
+                              64  // extraVertices
+                             };
+
+void Builders::buildPolygonTess(const Polygon& _polygon, float _height, PolygonBuilder& _ctx) {
 
     TESStesselator* tesselator = tessNewTess(&allocator);
     isect2d::AABB bbox;
@@ -115,9 +118,6 @@ void Builders::buildPolygon(const Polygon& _polygon, float _height, PolygonBuild
     tessDeleteTess(tesselator);
 }
 
-#else
-
-
 void Builders::buildPolygon(const Polygon& _polygon, float _height, PolygonBuilder& _ctx) {
 
     mapbox::Earcut<float, uint16_t> earcut;
@@ -158,9 +158,6 @@ void Builders::buildPolygon(const Polygon& _polygon, float _height, PolygonBuild
         _ctx.addVertex(coord, normal, uv);
     }
 }
-
-
-#endif
 
 void Builders::buildPolygonExtrusion(const Polygon& _polygon, float _minHeight, float _maxHeight, PolygonBuilder& _ctx) {
 
