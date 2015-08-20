@@ -27,3 +27,6 @@
 [submodule "core/include/variant"]
 	path = core/include/variant
 	url = https://github.com/mapbox/variant.git
+[submodule "core/dependencies/geojson-vt-cpp"]
+	path = core/dependencies/geojson-vt-cpp
+	url = https://github.com/mapbox/geojson-vt-cpp.git
