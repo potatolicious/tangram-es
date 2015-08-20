@@ -26,4 +26,4 @@
 	url = https://github.com/google/benchmark
 [submodule "core/include/variant"]
 	path = core/include/variant
-	url = https://github.com/mapbox/variant
+	url = https://github.com/mapbox/variant.git
