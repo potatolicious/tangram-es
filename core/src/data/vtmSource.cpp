@@ -225,9 +225,9 @@ bool VTMSource::extractFeature(
                         if (v == "motorway" || v == "motorway_link" ||
                             v == "trunk" || v == "trunk_link" ||
                             v == "primary" || v == "primary_link") {
-                            feature->props.stringProps.emplace("kind", "highway");
+                            feature->props.add("kind", "highway");
                         } else {
-                            feature->props.stringProps.emplace("kind", "minor_road");
+                            feature->props.add("kind", "minor_road");
                         }
 
                         break;
@@ -239,13 +239,13 @@ bool VTMSource::extractFeature(
                             feature = addFeature(tileData, "buildings");
                         }
 
-                        feature->props.stringProps.emplace("kind", v);
+                        feature->props.add("kind", v);
                         break;
                     }
                     if (k == "landuse" || k == "natural" || k == "leisure" || k == "amenity") {
                         feature = addFeature(tileData, "landuse");
 
-                        feature->props.stringProps.emplace("kind", v);
+                        feature->props.add("kind", v);
                         break;
                     }
                 }
@@ -259,9 +259,9 @@ bool VTMSource::extractFeature(
                             float numVal = atoi(val.c_str());
                             numVal *= _tile.getInverseScale();
                             numVal /= 100.0;
-                            feature->props.numericProps.emplace(key, numVal);
+                            feature->props.add(key, numVal);
                         } else {
-                            feature->props.stringProps.emplace(key, val);
+                            feature->props.add(key, val);
                         }
                     }
                 } else {
