@@ -10,11 +10,13 @@ attribute LOWP vec2 a_screenPosition;
 attribute vec2 a_uv;
 attribute LOWP float a_alpha;
 attribute LOWP float a_rotation;
+attribute LOWP vec3 a_color;
 
 uniform mat4 u_proj;
 
 varying vec2 v_uv;
 varying float v_alpha;
+varying vec3 v_color;
 
 void main() {
     if (a_alpha != 0.0) {
@@ -30,6 +32,7 @@ void main() {
         
         v_uv = a_uv;
         v_alpha = a_alpha;
+        v_color = a_color;
         
         gl_Position = u_proj * p;
     } else {
