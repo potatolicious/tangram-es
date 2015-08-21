@@ -17,6 +17,7 @@
 #include "filters.h"
 #include "sceneLayer.h"
 #include "scene/dataLayer.h"
+#include "text/fontContext.h"
 
 #include "yaml-cpp/yaml.h"
 
@@ -38,6 +39,7 @@ void SceneLoader::loadScene(const std::string& _file, Scene& _scene, TileManager
 
     loadSources(config["sources"], _tileManager);
     loadTextures(config["textures"], _scene);
+    loadFonts(config["fonts"]);
     loadStyles(config["styles"], _scene);
     loadLayers(config["layers"], _scene, _tileManager);
     loadCameras(config["cameras"], _view);
@@ -290,12 +292,22 @@ void SceneLoader::loadTextures(YAML::Node textures, Scene& scene) {
     }
 }
 
+void SceneLoader::loadFonts(YAML::Node fonts) {
+    auto devFontsPath = deviceFontsPath();
+    auto fontCtx = FontContext::GetInstance();
+
+    for (const auto& fontNode : fonts) {
+        const auto fontName = fontNode.as<std::string>();
+        fontCtx->addFont(fontName, fontName.substr(0, fontName.find(".ttf")), devFontsPath);
+    }
+}
+
 void SceneLoader::loadStyles(YAML::Node styles, Scene& scene) {
 
     // Instantiate built-in styles
     scene.styles().emplace_back(new PolygonStyle("polygons"));
     scene.styles().emplace_back(new PolylineStyle("lines"));
-    scene.styles().emplace_back(new TextStyle("FiraSans", "text", 15.0f, 0xF7F0E1, true, true));
+    scene.styles().emplace_back(new TextStyle("text", true, true));
     scene.styles().emplace_back(new DebugTextStyle("FiraSans", "debugtext", 30.0f, 0xDC3522, true));
     scene.styles().emplace_back(new DebugStyle("debug"));
     scene.styles().emplace_back(new SpriteStyle("sprites"));
@@ -324,7 +336,7 @@ void SceneLoader::loadStyles(YAML::Node styles, Scene& scene) {
         if (baseNode) {
             std::string baseString = baseNode.as<std::string>();
             if (baseString == "lines") { style = new PolylineStyle(styleName); }
-            else if (baseString == "text") { style = new TextStyle("FiraSans", styleName, 15.0f, 0xF7F0E1, true, true); }
+            else if (baseString == "text") { style = new TextStyle(styleName, true, true); }
             else if (baseString == "sprites") { logMsg("WARNING: sprite base styles not yet implemented\n"); } // TODO
             else { logMsg("WARNING: base style \"%s\" not recognized, defaulting to polygons\n", baseString.c_str()); }
         }
@@ -609,7 +621,7 @@ Filter SceneLoader::generateFilter(YAML::Node _filter) {
     if (!_filter) {
         return Filter();
     }
-    
+
     std::vector<Filter> filters;
 
     for (const auto& filtItr : _filter) {
