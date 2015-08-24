@@ -13,9 +13,9 @@ static ViewController* viewController;
 NSURLSession* defaultSession;
 
 void init(ViewController* _controller) {
-    
+
     viewController = _controller;
-    
+
     /* Setup NSURLSession configuration : cache path and size */
     NSURLSessionConfiguration *defaultConfigObject = [NSURLSessionConfiguration defaultSessionConfiguration];
     NSString *cachePath = @"/tile_cache";
@@ -24,10 +24,10 @@ void init(ViewController* _controller) {
     defaultConfigObject.requestCachePolicy = NSURLRequestUseProtocolCachePolicy;
     defaultConfigObject.timeoutIntervalForRequest = 30;
     defaultConfigObject.timeoutIntervalForResource = 60;
-    
+
     /* create a default NSURLSession using the defaultConfigObject*/
     defaultSession = [NSURLSession sessionWithConfiguration: defaultConfigObject ];
-    
+
 }
 
 void logMsg(const char* fmt, ...) {
@@ -40,33 +40,33 @@ void logMsg(const char* fmt, ...) {
 }
 
 void requestRender() {
-    
+
     [viewController renderOnce];
-    
+
 }
 
 void setContinuousRendering(bool _isContinuous) {
-    
+
     [viewController setContinuous:_isContinuous];
-    
+
 }
 
 bool isContinuousRendering() {
-    
+
     return [viewController continuous];
-    
+
 }
 
 NSString* resolveResourcePath(const char* _path) {
-    
+
     NSString* resourcePath = [[[NSBundle mainBundle] resourcePath] stringByAppendingString:@"/"];
     NSString* internalPath = [NSString stringWithUTF8String:_path];
     return [resourcePath stringByAppendingString:internalPath];
-    
+
 }
 
 std::string stringFromResource(const char* _path) {
-    
+
     NSString* path = resolveResourcePath(_path);
     NSString* str = [NSString stringWithContentsOfFile:path
                                               encoding:NSASCIIStringEncoding
@@ -76,7 +76,7 @@ std::string stringFromResource(const char* _path) {
         logMsg("Failed to read file at path: %s\n", _path);
         return std::move(std::string());
     }
-    
+
     return std::move(std::string([str UTF8String]));
 }
 
@@ -113,19 +113,19 @@ std::string deviceFontsPath() {
     return "";
 }
 
-bool parseTypeFaceFontsInfo(const std::string& _typefaceInput, std::string& _fontName, float& _fontSize) {
+bool parseTypeFaceFontsInfo(const std::string& _typefaceInput, std::string& _fontName, std::string& _fontSize) {
 
     char str[4][40];
-    float size;
+
     int num = sscanf(_typefaceInput.c_str(), "%s %s %s %s", str[0], str[1], str[2], str[3]);
+
     switch(num) {
         case 1:
             _fontName = str[0];
             break;
         case 2:
             try {
-                size = std::stof(std::string(str[0]));
-                _fontSize = size;
+                _fontSize = std::string(str[0]);
                 _fontName = str[1];
             } catch (const std::invalid_argument& e) {
                 _fontName = std::string(str[1]) + "-" + std::string(str[0]);
@@ -133,8 +133,7 @@ bool parseTypeFaceFontsInfo(const std::string& _typefaceInput, std::string& _fon
             break;
         case 3:
             try {
-                size = std::stof(std::string(str[1]));
-                _fontSize = size;
+                _fontSize = std::string(str[1]);
                 _fontName = std::string(str[2]) + "-" + std::string(str[0]);
             } catch (const std::invalid_argument& e) {
                 _fontName = std::string(str[2]) + "-" + std::string(str[1]) + std::string(str[0]);
@@ -142,8 +141,7 @@ bool parseTypeFaceFontsInfo(const std::string& _typefaceInput, std::string& _fon
             break;
         case 4:
             try {
-                size = std::stof(std::string(str[2]));
-                _fontSize = size;
+                _fontSize = std::string(str[2]);
                 _fontName = std::string(str[3]) + "-" + std::string(str[1]) + std::string(str[0]);
             } catch (const std::invalid_argument& e) {
                 _fontName = std::string(str[3]) + "-" + std::string(str[2]) + std::string(str[1]) + std::string(str[0]);
@@ -159,38 +157,38 @@ bool parseTypeFaceFontsInfo(const std::string& _typefaceInput, std::string& _fon
 bool startUrlRequest(const std::string& _url, UrlCallback _callback) {
 
     NSString* nsUrl = [NSString stringWithUTF8String:_url.c_str()];
-    
+
     void (^handler)(NSData*, NSURLResponse*, NSError*) = ^void (NSData* data, NSURLResponse* response, NSError* error) {
-        
+
         if(error == nil) {
-            
+
             int dataLength = [data length];
             std::vector<char> rawDataVec;
             rawDataVec.resize(dataLength);
             memcpy(rawDataVec.data(), (char *)[data bytes], dataLength);
             _callback(std::move(rawDataVec));
-            
+
         } else {
-            
+
             logMsg("ERROR: response \"%s\" with error \"%s\".\n", response, std::string([error.localizedDescription UTF8String]).c_str());
 
         }
-        
+
     };
-    
+
     NSURLSessionDataTask* dataTask = [defaultSession dataTaskWithURL:[NSURL URLWithString:nsUrl]
                                                     completionHandler:handler];
-    
+
     [dataTask resume];
-    
+
     return true;
 
 }
 
 void cancelUrlRequest(const std::string& _url) {
-    
+
     NSString* nsUrl = [NSString stringWithUTF8String:_url.c_str()];
-    
+
     [defaultSession getTasksWithCompletionHandler:^(NSArray* dataTasks, NSArray* uploadTasks, NSArray* downloadTasks) {
         for(NSURLSessionTask* task in dataTasks) {
             if([[task originalRequest].URL.absoluteString isEqualToString:nsUrl]) {
@@ -199,7 +197,7 @@ void cancelUrlRequest(const std::string& _url) {
             }
         }
     }];
-    
+
 }
 
 void setCurrentThreadPriority(int priority) {}
