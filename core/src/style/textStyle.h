@@ -40,6 +40,11 @@ protected:
 
     bool m_sdf;
     bool m_sdfMultisampling = true;
+    
+private:
+    
+    // parse a font size (in em, pt, %) and give the appropriate size in pixel
+    float parseFontSize(const std::string& _size) const;
 
 public:
 

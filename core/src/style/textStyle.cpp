@@ -52,6 +52,7 @@ TextStyle::Parameters TextStyle::parseRule(const DrawRule& _rule) const {
     //TODO: handle different size formats, px, pt, em
 
     std::string typefaceStr;
+    std::string fontSize;
     std::string cap;
 
     _rule.getValue(StyleParamKey::font_size, p.fontSize);
@@ -68,14 +69,45 @@ TextStyle::Parameters TextStyle::parseRule(const DrawRule& _rule) const {
 
     // Parse typefaceStr to Property.typeface and Property.size
     // Atleast for android fontName should be like: Roboto-BoldItalic
-    if( parseTypeFaceFontsInfo(typefaceStr, p.fontName, p.fontSize) ) {
+    if(parseTypeFaceFontsInfo(typefaceStr, p.fontName, fontSize)) {
     } else {
         logMsg("Error in parsing typeface font information.\n");
         p.fontName = "";
         p.fontSize = 0.0f;
     }
+    
+    p.fontSize = parseFontSize(fontSize);
 
     return p;
+}
+    
+float TextStyle::parseFontSize(const std::string& _size) const {
+    std::string::size_type index = 0;
+    std::string kind;
+    float size;
+
+    while (index < _size.length() && std::isdigit(_size[index])) {
+        ++index;
+    }
+    
+    if (index == _size.length()) {
+        return std::stof(_size);
+    }
+    
+    kind = _size.substr(index, _size.length() - 1);
+    size = std::stof(_size.substr(0, index));
+
+    if (kind == "px") {
+        return size;
+    } else if (kind == "em") {
+        return 16.f * size;
+    } else if (kind == "pt") {
+        return size / 0.75f;
+    } else if (kind == "%") {
+        return size / 6.25f;
+    }
+
+    return 0.f;
 }
 
 void TextStyle::buildPoint(const Point& _point, const DrawRule& _rule, const Properties& _props, VboMesh& _mesh, Tile& _tile) const {
