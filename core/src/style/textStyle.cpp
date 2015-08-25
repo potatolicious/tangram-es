@@ -54,7 +54,6 @@ Parameters TextStyle::parseRule(const DrawRule& _rule) const {
     std::string typefaceStr;
     std::string cap;
 
-    _rule.getValue(StyleParamKey::font_size, p.fontSize);
     _rule.getValue(StyleParamKey::font_typeface, typefaceStr);
     _rule.getColor(StyleParamKey::font_fill, p.fill);
     if (_rule.getColor(StyleParamKey::font_stroke, p.strokeColor)) {
@@ -155,7 +154,7 @@ void TextStyle::buildPolygon(const Polygon& _polygon, const DrawRule& _rule, con
 
 void TextStyle::onBeginDrawFrame(const View& _view, const Scene& _scene) {
     bool contextLost = Style::glContextLost();
-    
+
     FontContext::GetInstance()->bindAtlas(0);
 
     static bool initUniformSampler = true;
