@@ -194,8 +194,16 @@ bool FilterContext::parseStyleResult(StyleParamKey _key, StyleParam::Value& _val
                 _val = DrawRule::parseColor(v);
                 result = true;
             } else if (duk_is_number(m_ctx, -1)) {
-                //int v = duk_get_int(m_ctx, -1);
-                // TODO
+                // TODO alpha
+
+                int v = static_cast<uint32_t>(duk_get_int(m_ctx, -1));
+                _val = Color {
+                    static_cast<uint8_t>((v >> 16) & 0xFF),
+                    static_cast<uint8_t>((v >> 8) & 0xFF),
+                    static_cast<uint8_t>((v) & 0xFF),
+                    1
+                };
+
                 result = true;
             }
             // TODO color object
