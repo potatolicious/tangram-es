@@ -162,13 +162,20 @@ layers:
                 order: 50
                 color: 
                   function() {
-                  var color = [
+                  /* var color = [
                      0.9 * (parseInt(feature.id, 16) / 100 % 1) * 255 | 0,
                      0.9 * (parseInt(feature.id, 16) / 10000 % 1) * 255 | 0,
                      0.9 * (parseInt(feature.id, 16) / 1000000 % 1) * 255 | 0
                      ];
-                  var str =  '#' + color[0].toString(16) + color[1].toString(16) + color[2].toString(16);
-                  return str;
+                     return  '#' + color[0].toString(16) + color[1].toString(16) + color[2].toString(16);
+                  */
+                  /* var c = parseInt(feature.id, 16); */
+                  /* print(feature.id); */
+                  var c = feature.id % 4356547;
+                  return (0.8 * (c / 100 % 1) * 255 << 16) +
+                          (0.8 * (c / 10000 % 1) * 255 << 8) +
+                          (0.8 * (c / 1000000 % 1) * 255 | 0);
+
                   }
         # turn interactive feature selection on for buildings with names
         interactive:
