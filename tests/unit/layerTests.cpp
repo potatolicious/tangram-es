@@ -5,6 +5,8 @@
 
 using namespace Tangram;
 
+using Context = FilterContext;
+
 // Functions to initialize SceneLayer instances
 
 SceneLayer instance_a() {

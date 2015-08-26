@@ -12,6 +12,8 @@
 using namespace Tangram;
 using YAML::Node;
 
+using Context = FilterContext;
+
 SceneLoader sceneLoader;
 Context ctx;
 
