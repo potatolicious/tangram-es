@@ -42,9 +42,15 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
 
     switch (key) {
     case StyleParamKey::font_typeface:
+        value = _value;
+        break;
     case StyleParamKey::font_capitalized:
     case StyleParamKey::font_visible:
-        value = _value;
+        if (_value == "true") { value = true; }
+        else if (_value == "false") { value = false; }
+        else {
+            logMsg("Warning: Bool value required for capitalized/visible. Using Default.");
+        }
         break;
     case StyleParamKey::order:
         value = static_cast<int32_t>(std::stoi(_value));
@@ -78,9 +84,10 @@ std::string StyleParam::toString() const {
     // TODO: cap, join and color toString()
     switch (key) {
     case StyleParamKey::font_typeface:
+        return value.get<std::string>();
     case StyleParamKey::font_capitalized:
     case StyleParamKey::font_visible:
-        return value.get<std::string>();
+        return std::to_string(value.get<bool>());
     case StyleParamKey::order:
         return std::to_string(value.get<int32_t>());
     case StyleParamKey::width:
@@ -158,6 +165,17 @@ const StyleParam&  DrawRule::findParameter(StyleParamKey _key) const {
         return *it;
     }
     return NONE;
+}
+
+bool DrawRule::getValue(StyleParamKey _key, bool& _value) const {
+    auto& param = findParameter(_key);
+    if (!param) { return false; }
+    if (!param.value.is<bool>()) {
+        logMsg("Error: not a bool\n");
+        return false;
+    }
+    _value = param.value.get<bool>();
+    return true;
 }
 
 bool DrawRule::getValue(StyleParamKey _key, std::string& _value) const {
