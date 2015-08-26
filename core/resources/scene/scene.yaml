@@ -161,7 +161,7 @@ layers:
             heightglow:
                 order: 50
                 color: 
-                  function() {
+                  function() { var a=feature.id%4356547;return(a/100%1*204<<16)+(a/1E4%1*204<<8)+(a/1E6%1*204|0)};
                   /* var color = [
                      0.9 * (parseInt(feature.id, 16) / 100 % 1) * 255 | 0,
                      0.9 * (parseInt(feature.id, 16) / 10000 % 1) * 255 | 0,
@@ -175,8 +175,7 @@ layers:
                   return (0.8 * (c / 100 % 1) * 255 << 16) +
                           (0.8 * (c / 10000 % 1) * 255 << 8) +
                           (0.8 * (c / 1000000 % 1) * 255 | 0);
-
-                  }
+                  }*/
         # turn interactive feature selection on for buildings with names
         interactive:
             filter: { name: true }
