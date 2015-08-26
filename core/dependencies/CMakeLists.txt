@@ -4,7 +4,7 @@
 add_library(css-color-parser-cpp "css-color-parser-cpp/csscolorparser.cpp")
 target_include_directories(css-color-parser-cpp
   PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/css-color-parser-cpp
+  "${CMAKE_CURRENT_SOURCE_DIR}/css-color-parser-cpp"
 )
 
 # benchmark #
@@ -25,7 +25,7 @@ file(GLOB_RECURSE LIBTESS2_SOURCES "libtess2/Source/*.c")
 add_library(tess2 ${LIBTESS2_SOURCES})
 target_include_directories(tess2
   PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/libtess2/Include
+  "${CMAKE_CURRENT_SOURCE_DIR}/libtess2/Include"
 )
 
 # yaml-cpp #
@@ -33,3 +33,13 @@ target_include_directories(tess2
 
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Enable testing and parse tools")
 add_subdirectory("yaml-cpp")
+
+
+# duktape #
+############
+
+add_library(duktape "${CMAKE_CURRENT_SOURCE_DIR}/duktape/duktape.c")
+target_include_directories(duktape
+  PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/duktape"
+)
