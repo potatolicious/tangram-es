@@ -25,7 +25,7 @@ const std::map<std::string, StyleParamKey> s_StyleParamMap = {
 };
 
 StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
-    functionID = -1;
+    function = -1;
 
     auto it = s_StyleParamMap.find(_key);
     if (it == s_StyleParamMap.end()) {
@@ -64,6 +64,10 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
 
 std::string StyleParam::toString() const {
     // TODO: cap, join and color toString()
+    if (value.is<none_type>()) {
+        return "undefined";
+    }
+
     switch (key) {
     case StyleParamKey::order:
         return std::to_string(value.get<int32_t>());
@@ -129,7 +133,7 @@ std::string DrawRule::toString() const {
     return str;
 }
 
-const StyleParam&  DrawRule::findParameter(StyleParamKey _key) const {
+inline const StyleParam&  DrawRule::findParameter(StyleParamKey _key) const {
 
     auto it = std::lower_bound(parameters.begin(), parameters.end(), _key,
                                [](auto& p, auto& k) { return p.key < k; });
@@ -233,8 +237,8 @@ Color DrawRule::parseColor(const std::string& _color) {
 
 void DrawRule::eval(const FilterContext& _ctx) {
      for (auto& param : parameters) {
-         if (param.functionID >= 0) {
-             _ctx.evalStyle(param.functionID, param.key, param.value);
+         if (param.function >= 0) {
+             _ctx.evalStyle(param.function, param.key, param.value);
          }
      }
 }
