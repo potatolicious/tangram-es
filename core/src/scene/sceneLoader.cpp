@@ -23,6 +23,7 @@
 #include <algorithm>
 
 using YAML::Node;
+using YAML::NodeType;
 using YAML::BadConversion;
 
 namespace Tangram {
@@ -88,7 +89,7 @@ glm::vec3 parseVec3(const Node& node) {
     return vec;
 }
 
-void SceneLoader::loadShaderConfig(YAML::Node shaders, ShaderProgram& shader) {
+void SceneLoader::loadShaderConfig(Node shaders, ShaderProgram& shader) {
 
     if (!shaders) {
         return;
@@ -129,7 +130,7 @@ void SceneLoader::loadShaderConfig(YAML::Node shaders, ShaderProgram& shader) {
     }
 }
 
-void SceneLoader::loadMaterial(YAML::Node matNode, Material& material, Scene& scene) {
+void SceneLoader::loadMaterial(Node matNode, Material& material, Scene& scene) {
 
     Node diffuse = matNode["diffuse"];
     if (diffuse) {
@@ -195,7 +196,7 @@ void SceneLoader::loadMaterial(YAML::Node matNode, Material& material, Scene& sc
     }
 }
 
-MaterialTexture SceneLoader::loadMaterialTexture(YAML::Node matCompNode, Scene& scene) {
+MaterialTexture SceneLoader::loadMaterialTexture(Node matCompNode, Scene& scene) {
 
     MaterialTexture matTex;
 
@@ -253,7 +254,7 @@ MaterialTexture SceneLoader::loadMaterialTexture(YAML::Node matCompNode, Scene& 
     return matTex;
 }
 
-void SceneLoader::loadTextures(YAML::Node textures, Scene& scene) {
+void SceneLoader::loadTextures(Node textures, Scene& scene) {
 
     if (!textures) {
         return;
@@ -290,7 +291,7 @@ void SceneLoader::loadTextures(YAML::Node textures, Scene& scene) {
     }
 }
 
-void SceneLoader::loadStyles(YAML::Node styles, Scene& scene) {
+void SceneLoader::loadStyles(Node styles, Scene& scene) {
 
     // Instantiate built-in styles
     scene.styles().emplace_back(new PolygonStyle("polygons"));
@@ -601,7 +602,7 @@ void SceneLoader::loadCameras(Node cameras, View& view) {
     }
 }
 
-Filter SceneLoader::generateFilter(YAML::Node _filter, Scene& scene) {
+Filter SceneLoader::generateFilter(Node _filter, Scene& scene) {
 
     if (!_filter) {
         return Filter();
@@ -655,7 +656,7 @@ Filter SceneLoader::generateFilter(YAML::Node _filter, Scene& scene) {
 
 }
 
-Filter SceneLoader::generatePredicate(YAML::Node _node, std::string _key) {
+Filter SceneLoader::generatePredicate(Node _node, std::string _key) {
 
     if (_node.IsScalar()) {
         if (_node.Tag() == "tag:yaml.org,2002:str") {
@@ -718,7 +719,7 @@ Filter SceneLoader::generatePredicate(YAML::Node _node, std::string _key) {
     }
 }
 
-Filter SceneLoader::generateAnyFilter(YAML::Node _filter, Scene& scene) {
+Filter SceneLoader::generateAnyFilter(Node _filter, Scene& scene) {
     std::vector<Filter> filters;
 
     if (!_filter.IsSequence()) {
@@ -731,7 +732,7 @@ Filter SceneLoader::generateAnyFilter(YAML::Node _filter, Scene& scene) {
     return Filter(Operators::any, std::move(filters));
 }
 
-Filter SceneLoader::generateNoneFilter(YAML::Node _filter, Scene& scene) {
+Filter SceneLoader::generateNoneFilter(Node _filter, Scene& scene) {
 
     std::vector<Filter> filters;
 
@@ -752,7 +753,7 @@ Filter SceneLoader::generateNoneFilter(YAML::Node _filter, Scene& scene) {
     return Filter(Operators::none, std::move(filters));
 }
 
-std::vector<StyleParam> SceneLoader::parseStyleParams(Scene& scene, Node params, const std::string& prefix) {
+std::vector<StyleParam> SceneLoader::parseStyleParams(Node params, Scene& scene, const std::string& prefix) {
 
     std::vector<StyleParam> out;
 
@@ -763,12 +764,12 @@ std::vector<StyleParam> SceneLoader::parseStyleParams(Scene& scene, Node params,
         Node value = prop.second;
 
         switch (value.Type()) {
-             case YAML::NodeType::Scalar: {
+             case NodeType::Scalar: {
                  auto& val = value.as<std::string>();
 
                  if (val.compare(0, 8, "function") == 0) {
                      StyleParam param(key, "");
-                     param.functionID = scene.functions().size();
+                     param.function = scene.functions().size();
                      scene.functions().push_back(val);
                      out.push_back(std::move(param));
                  } else {
@@ -777,9 +778,10 @@ std::vector<StyleParam> SceneLoader::parseStyleParams(Scene& scene, Node params,
                  break;
              }
 
-            case YAML::NodeType::Sequence: out.push_back({ key, parseSequence(value) }); break;
-            case YAML::NodeType::Map: {
-                auto subparams = parseStyleParams(scene, value, key);
+            case NodeType::Sequence: out.push_back({ key, parseSequence(value) });
+                break;
+            case NodeType::Map: {
+                auto subparams = parseStyleParams(value, scene, key);
                 out.insert(out.end(), subparams.begin(), subparams.end());
                 break;
             }
@@ -790,7 +792,7 @@ std::vector<StyleParam> SceneLoader::parseStyleParams(Scene& scene, Node params,
     return out;
 }
 
-SceneLayer SceneLoader::loadSublayer(YAML::Node layer, const std::string& name, Scene& scene) {
+SceneLayer SceneLoader::loadSublayer(Node layer, const std::string& name, Scene& scene) {
 
     std::vector<SceneLayer> sublayers;
     std::vector<DrawRule> rules;
@@ -810,9 +812,9 @@ SceneLayer SceneLoader::loadSublayer(YAML::Node layer, const std::string& name, 
                 auto style = explicitStyle
                     ? explicitStyle.as<std::string>()
                     : ruleNode.first.as<std::string>();
-                auto params = parseStyleParams(scene, ruleNode.second);
-                rules.push_back({ style, params });
 
+                auto params = parseStyleParams(ruleNode.second, scene);
+                rules.push_back({ style, params });
             }
         } else if (key == "filter") {
             filter = generateFilter(member.second, scene);
