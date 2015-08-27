@@ -4,6 +4,7 @@
 #include "util/builders.h"
 #include "gl/shaderProgram.h"
 #include "tile/tile.h"
+#include "geom.h"
 
 namespace Tangram {
 
@@ -68,6 +69,7 @@ void PolygonStyle::buildLine(const Line& _line, const DrawRule& _rule, const Pro
 static std::mutex s_staticstics;
 static double s_total1 = 0;
 static double s_total2 = 0;
+static double s_maxDuration = 0;
 static uint64_t s_sumVertices = 0;
 
 void PolygonStyle::buildPolygon(const Polygon& _polygon, const DrawRule& _rule, const Properties& _props, VboMesh& _mesh, Tile& _tile) const {
@@ -101,31 +103,52 @@ void PolygonStyle::buildPolygon(const Polygon& _polygon, const DrawRule& _rule, 
     Builders::buildPolygon(_polygon, height, builder);
     auto end1  = std::chrono::high_resolution_clock::now();
 
-    auto duration1 = std::chrono::duration_cast<std::chrono::nanoseconds>(end1 - start1).count();
+    double duration1 = std::chrono::duration_cast<std::chrono::nanoseconds>(end1 - start1).count();
 
     PolygonBuilder builder2 = {
         [&](const glm::vec3& coord, const glm::vec3& normal, const glm::vec2& uv){
             vertices2.push_back({ coord, normal, uv, abgr, layer });
         },
-        [&](size_t sizeHint){ vertices.reserve(sizeHint); }
+        [&](size_t sizeHint){ vertices2.reserve(sizeHint); }
     };
 
     auto start2 = std::chrono::high_resolution_clock::now();
     Builders::buildPolygonTess(_polygon, height, builder2);
     auto end2 = std::chrono::high_resolution_clock::now();
 
-    auto duration2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end2 - start2).count();
+    double duration2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end2 - start2).count();
+
+    double allMax = 0;
 
     {
         std::lock_guard<std::mutex> lock(s_staticstics);
         s_total1 += double(duration1 / 1e9);
         s_total2 += double(duration2 / 1e9);
         s_sumVertices += vertices.size();
+
+        s_maxDuration = std::max(s_maxDuration, duration1);
+        s_maxDuration = std::max(s_maxDuration, duration2);
+        allMax = s_maxDuration;
     }
 
-    if (minHeight != height) {
-        Builders::buildPolygonExtrusion(_polygon, minHeight, height, builder);
+    double max = std::max(duration2, duration1);
+
+    if (max > 0) {
+        // if duration
+        int b = CLAMP(255.0 * ((duration2 - duration1) / max), -255.0, 255.0);
+
+        int g = (max / allMax) * 255;
+
+        uint32_t c = 0xff000000 | (b > 0 ? (b << 16) : -b) | (g << 8);
+
+        for (auto& v : vertices) {
+            v.abgr = c;
+        }
     }
+
+    // if (minHeight != height) {
+    //     Builders::buildPolygonExtrusion(_polygon, minHeight, height, builder);
+    // }
 
     auto& mesh = static_cast<PolygonStyle::Mesh&>(_mesh);
     mesh.addVertices(std::move(vertices), std::move(builder.indices));
