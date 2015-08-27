@@ -39,15 +39,15 @@ JoinTypes JoinTypeFromString(const std::string& str) {
 }
 
 void* alloc(void* _userData, unsigned int _size) {
-    return std::malloc(_size);
+    return ::malloc(_size);
 }
 
 void* realloc(void* _userData, void* _ptr, unsigned int _size) {
-    return std::realloc(_ptr, _size);
+    return ::realloc(_ptr, _size);
 }
 
 void free(void* _userData, void* _ptr) {
-    std::free(_ptr);
+    ::free(_ptr);
 }
 
 static TESSalloc allocator = {&alloc, &realloc, &free, nullptr,
