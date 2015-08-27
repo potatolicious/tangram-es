@@ -133,22 +133,19 @@ void PolygonStyle::buildPolygon(const Polygon& _polygon, const DrawRule& _rule, 
 
     double max = std::max(duration2, duration1);
 
+    if (minHeight != height) {
+        Builders::buildPolygonExtrusion(_polygon, minHeight, height, builder);
+    }
+
     if (max > 0) {
-        // if duration
-        int b = CLAMP(255.0 * ((duration2 - duration1) / max), -255.0, 255.0);
+        int d = CLAMP(255.0 * ((duration2 - duration1) / max), -255.0, 255.0) * (0.5 + (max / allMax) * 0.5);
 
-        int g = (max / allMax) * 255;
-
-        uint32_t c = 0xff000000 | (b > 0 ? (b << 16) : -b) | (g << 8);
+        uint32_t c = 0xff000000 | (d > 0 ? (d << 16) : -d);
 
         for (auto& v : vertices) {
             v.abgr = c;
         }
     }
-
-    // if (minHeight != height) {
-    //     Builders::buildPolygonExtrusion(_polygon, minHeight, height, builder);
-    // }
 
     auto& mesh = static_cast<PolygonStyle::Mesh&>(_mesh);
     mesh.addVertices(std::move(vertices), std::move(builder.indices));
