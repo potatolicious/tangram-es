@@ -30,7 +30,8 @@ const std::map<std::string, StyleParamKey> s_StyleParamMap = {
     {"font:stroke_color", StyleParamKey::font_stroke_color},
     {"font:stroke_width", StyleParamKey::font_stroke_width},
     {"font:capitalized", StyleParamKey::font_capitalized},
-    {"font:visible", StyleParamKey::font_visible}
+    {"text:visible", StyleParamKey::text_visible},
+    {"text:priority", StyleParamKey::text_prioriy},
 };
 
 StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
@@ -50,7 +51,7 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
         value = _value;
         break;
     case StyleParamKey::font_capitalized:
-    case StyleParamKey::font_visible:
+    case StyleParamKey::text_visible:
         if (_value == "true") { value = true; }
         else if (_value == "false") { value = false; }
         else {
@@ -58,6 +59,7 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
         }
         break;
     case StyleParamKey::order:
+    case StyleParamKey::text_prioriy:
         value = static_cast<int32_t>(std::stoi(_value));
         break;
     case StyleParamKey::width:
@@ -94,9 +96,10 @@ std::string StyleParam::toString() const {
     case StyleParamKey::font_face:
         return value.get<std::string>();
     case StyleParamKey::font_capitalized:
-    case StyleParamKey::font_visible:
+    case StyleParamKey::text_visible:
         return std::to_string(value.get<bool>());
     case StyleParamKey::order:
+    case StyleParamKey::text_prioriy:
         return std::to_string(value.get<int32_t>());
     case StyleParamKey::width:
     case StyleParamKey::outline_width:
