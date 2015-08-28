@@ -21,7 +21,10 @@ const std::map<std::string, StyleParamKey> s_StyleParamMap = {
     {"outline:width", StyleParamKey::outline_width},
     {"outline:cap", StyleParamKey::outline_cap},
     {"outline:join", StyleParamKey::outline_join},
-    {"font:typeface", StyleParamKey::font_typeface},
+    {"font:name", StyleParamKey::font_name},
+    {"font:weight", StyleParamKey::font_weight},
+    {"font:face", StyleParamKey::font_face},
+    {"font:size", StyleParamKey::font_size},
     {"font:fill", StyleParamKey::font_fill},
     {"font:stroke", StyleParamKey::font_stroke},
     {"font:stroke_color", StyleParamKey::font_stroke_color},
@@ -41,7 +44,9 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
     key = it->second;
 
     switch (key) {
-    case StyleParamKey::font_typeface:
+    case StyleParamKey::font_name:
+    case StyleParamKey::font_weight:
+    case StyleParamKey::font_face:
         value = _value;
         break;
     case StyleParamKey::font_capitalized:
@@ -57,6 +62,7 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
         break;
     case StyleParamKey::width:
     case StyleParamKey::outline_width:
+    case StyleParamKey::font_size:
     case StyleParamKey::font_stroke_width:
         value = static_cast<float>(std::stof(_value));
         break;
@@ -83,7 +89,9 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
 std::string StyleParam::toString() const {
     // TODO: cap, join and color toString()
     switch (key) {
-    case StyleParamKey::font_typeface:
+    case StyleParamKey::font_name:
+    case StyleParamKey::font_weight:
+    case StyleParamKey::font_face:
         return value.get<std::string>();
     case StyleParamKey::font_capitalized:
     case StyleParamKey::font_visible:
@@ -92,6 +100,7 @@ std::string StyleParam::toString() const {
         return std::to_string(value.get<int32_t>());
     case StyleParamKey::width:
     case StyleParamKey::outline_width:
+    case StyleParamKey::font_size:
     case StyleParamKey::font_stroke_width:
         return std::to_string(value.get<float>());
     case StyleParamKey::color:
