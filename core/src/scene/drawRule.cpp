@@ -21,9 +21,9 @@ const std::map<std::string, StyleParamKey> s_StyleParamMap = {
     {"outline:width", StyleParamKey::outline_width},
     {"outline:cap", StyleParamKey::outline_cap},
     {"outline:join", StyleParamKey::outline_join},
-    {"font:name", StyleParamKey::font_name},
+    {"font:family", StyleParamKey::font_family},
     {"font:weight", StyleParamKey::font_weight},
-    {"font:face", StyleParamKey::font_face},
+    {"font:style", StyleParamKey::font_style},
     {"font:size", StyleParamKey::font_size},
     {"font:fill", StyleParamKey::font_fill},
     {"font:stroke", StyleParamKey::font_stroke},
@@ -46,9 +46,9 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
     key = it->second;
 
     switch (key) {
-    case StyleParamKey::font_name:
+    case StyleParamKey::font_family:
     case StyleParamKey::font_weight:
-    case StyleParamKey::font_face:
+    case StyleParamKey::font_style:
         value = _value;
         break;
     case StyleParamKey::font_capitalized:
@@ -92,9 +92,9 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
 std::string StyleParam::toString() const {
     // TODO: cap, join and color toString()
     switch (key) {
-    case StyleParamKey::font_name:
+    case StyleParamKey::font_family:
     case StyleParamKey::font_weight:
-    case StyleParamKey::font_face:
+    case StyleParamKey::font_style:
         return value.get<std::string>();
     case StyleParamKey::font_capitalized:
     case StyleParamKey::visible:
