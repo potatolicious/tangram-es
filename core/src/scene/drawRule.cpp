@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <map>
+#include <stdexcept>
 
 namespace Tangram {
 
@@ -39,11 +40,13 @@ StyleParam::StyleParam(const std::string& _key, const std::string& _value) {
 
     switch (key) {
     case StyleParamKey::order:
-        value = static_cast<int32_t>(std::stoi(_value));
+        try { value = static_cast<int32_t>(std::stoi(_value)); }
+        catch(const std::invalid_argument& e) { value = none_type{}; }
         break;
     case StyleParamKey::width:
     case StyleParamKey::outline_width:
-        value = static_cast<float>(std::stof(_value));
+        try { value = static_cast<float>(std::stof(_value)); }
+        catch(const std::invalid_argument& e) { value = none_type{}; }
         break;
     case StyleParamKey::color:
     case StyleParamKey::outline_color:
